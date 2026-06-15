@@ -5,10 +5,17 @@
 
 #include "EngineUtils.h"
 #include "Task009.h"
+#include "TASKPlayerState.h"
 #include "Game/TASKGameModeBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Net/UnrealNetwork.h"
 #include "UI/TASKChatInput.h"
+
+ATASKPlayerController::ATASKPlayerController()
+{
+	bReplicates = true;
+}
 
 void ATASKPlayerController::BeginPlay()
 {
@@ -36,6 +43,15 @@ void ATASKPlayerController::BeginPlay()
 			ChatInputWidgetInstance->AddToViewport();
 		}
 	}
+	
+	if (IsValid(NotificationTextWidgetClass) == true)
+	{
+		NotificationTextWidgetInstance = CreateWidget<UUserWidget>(this, NotificationTextWidgetClass);
+		if (IsValid(NotificationTextWidgetInstance) == true)
+		{
+			NotificationTextWidgetInstance->AddToViewport();
+		}
+	}
 }
 
 // 입력된 문자열 저장
@@ -46,7 +62,14 @@ void ATASKPlayerController::SetChatMessageString(const FString& InChatMessageStr
 	// PrintChatMessageString(ChatMessageString);
 	if (IsLocalController() == true)
 	{
-		ServerRPCPrintChatMessageString(InChatMessageString);		
+		//ServerRPCPrintChatMessageString(InChatMessageString);	
+		ATASKPlayerState* CXPS = GetPlayerState<ATASKPlayerState>();
+		if (IsValid(CXPS) == true)
+		{
+			FString CombinedMessageString = CXPS->PlayerNameString + TEXT(": ") + InChatMessageString;
+
+			ServerRPCPrintChatMessageString(CombinedMessageString);
+		}
 	}
 }
 
@@ -60,6 +83,13 @@ void ATASKPlayerController::PrintChatMessageString(const FString& InChatMessageS
 	// ChatXFunctionLibrary::MyPrintString(this, CombinedMessageString, 10.f);
 	
 	ChatXFunctionLibrary::MyPrintString(this, InChatMessageString, 10.f);
+}
+
+void ATASKPlayerController::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME(ThisClass, NotificationText);
 }
 
 // 서버가 특정 클라이언트에게 실행을 명령한 RPC의 실제 본문 로직

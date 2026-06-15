@@ -7,6 +7,7 @@
 #include "TASKPlayerController.generated.h"
 
 class UTASKChatInput;
+class UUserWidget;
 
 /**
  * 
@@ -17,6 +18,8 @@ class TASK009_API ATASKPlayerController : public APlayerController
 	GENERATED_BODY()
 	
 public:
+	ATASKPlayerController();
+	
 	virtual void BeginPlay() override;
 	
 	// 채팅 입력
@@ -37,8 +40,10 @@ public:
 	UFUNCTION(Server, Reliable)
 	void ServerRPCPrintChatMessageString(const FString& InChatMessageString);
 	
-	// 엔터키를 누를 때마다 채팅창을 켜고 끌 핵심 함수
+	// 엔터키를 누를 때마다 채팅창을 켜고 끌 함수
 	void OnToggleChat();
+	
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	
 protected:
 	UPROPERTY(EditDefaultsOnly)
@@ -50,7 +55,17 @@ protected:
 	// 입력 받은 채팅 문자열
 	FString ChatMessageString;
 	
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UUserWidget> NotificationTextWidgetClass;
+	
+	UPROPERTY()
+	TObjectPtr<UUserWidget> NotificationTextWidgetInstance;
+	
 private:
 	// 채팅 가능 여부
 	bool bIsChatActive;
+	
+public:
+	UPROPERTY(Replicated, BlueprintReadOnly)
+	FText NotificationText;
 };

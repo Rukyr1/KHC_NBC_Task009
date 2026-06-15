@@ -6,6 +6,8 @@
 #include "GameFramework/GameStateBase.h"
 #include "TASKGameStateBase.generated.h"
 
+class ATASKPlayerController;
+
 /**
  * 
  */
@@ -20,4 +22,10 @@ public:
 	// '모든 클라이언트'에서 동시에 실행되는 네트워크 함수
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastRPCBroadcastLoginMessage(const FString& InNameString = FString(TEXT("XXXXXXX")));
+	
+	FString GenerateSecretNumber();
+
+	bool IsGuessNumberString(const FString& InNumberString);
+
+	FString JudgeResult(const FString& InSecretNumberString, const FString& InGuessNumberString);
 };

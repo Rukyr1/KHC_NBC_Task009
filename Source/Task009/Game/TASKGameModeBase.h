@@ -34,6 +34,12 @@ public:
 	virtual void BeginPlay() override;
 	
 	void PrintChatMessageString(ATASKPlayerController* InChattingPlayerController, const FString& InChatMessageString);
+	
+	void IncreaseGuessCount(ATASKPlayerController* InChattingPlayerController);
+
+	void ResetGame();
+
+	void JudgeGame(ATASKPlayerController* InChattingPlayerController, int InStrikeCount);
 
 protected:
 	FString SecretNumberString;
